@@ -144,7 +144,7 @@ async fn run<M: Middleware + Clone + 'static>(provider: M, opts: Opts) -> anyhow
                         .gas_price;
 
                     let evaluation =
-                        Evaluation::new(inspection, &prices, gas_used, gas_price).await?;
+                    Evaluation::new(inspection, &prices, gas_used, gas_price.unwrap_or_default()).await?;
                     println!("Found: {:?}", evaluation.as_ref().hash);
                     println!("Revenue: {:?} WEI", evaluation.profit);
                     println!("Cost: {:?} WEI", evaluation.gas_used * evaluation.gas_price);
@@ -288,7 +288,7 @@ async fn process_block<M: Middleware + 'static>(
     let gas_price_txs = block
         .transactions
         .iter()
-        .map(|tx| (tx.hash, tx.gas_price))
+        .filter_map(|tx| tx.gas_price.map(|price| (tx.hash, price)))
         .collect::<HashMap<TxHash, U256>>();
 
     // get all the receipts

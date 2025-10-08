@@ -237,7 +237,7 @@ impl<M: Middleware + Unpin + 'static> Stream for BatchEvaluator<M> {
                     let gas_price_txs = block
                         .transactions
                         .iter()
-                        .map(|tx| (tx.hash, tx.gas_price))
+                        .filter_map(|tx| tx.gas_price.map(|price| (tx.hash, price)))
                         .collect::<HashMap<TxHash, U256>>();
 
                     let gas_used_txs = receipts
